@@ -8,31 +8,40 @@ package com.mycompany.services;
 import com.codename1.io.CharArrayReader;
 import com.codename1.io.ConnectionRequest;
 import com.codename1.io.JSONParser;
+import com.codename1.io.NetworkEvent;
 import com.codename1.io.NetworkManager;
 import com.codename1.ui.ComboBox;
 import com.codename1.ui.Dialog;
+import java.util.List;
 import com.codename1.ui.TextField;
+import com.codename1.ui.events.ActionListener;
 import com.codename1.ui.util.Resources;
-import com.mycomany.utils.Statics1;
+import com.mycomany.utils.SessionManager;
+import com.mycomany.utils.Statics;
+import com.mycompany.gui.AcceuilForm;
+import com.mycompany.gui.AdminForm;
 
-import com.mycompany.gui.AjoutProgrammeForm1;
+
+import com.mycompany.gui.EditForm;
 import com.mycompany.gui.ListProgrammeForm1;
-
+import com.mycompany.gui.NewsfeedForm;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.Vector;
 
-/**
- *
- * @author Lenovo
- */
+
 public class ServiceUtilisateur {
     
     
+    
+    private Resources res;
   //singleton 
     public static ServiceUtilisateur instance = null ;
     
     public static boolean resultOk = true;
     String json;
+    public static boolean resultOK = true;
 
     //initilisation connection request 
     private ConnectionRequest req;
@@ -51,108 +60,140 @@ public class ServiceUtilisateur {
         
     }
     
-    //Signup
-    public void signup(TextField username,TextField password,TextField email,TextField confirmPassword, ComboBox<String> roles , Resources res ) {
-        
-     
-        
-        String url = Statics1.BASE_URL+"/user/signup?username="+username.getText().toString()+"&email="+email.getText().toString()+
-                "&password="+password.getText().toString()+"&roles="+roles.getSelectedItem().toString();
-        
+    public boolean signup(String username,String lastname,String firstname,String email,String password, Resources res) {
+      //  System.out.println(u);
+        System.out.println("******");
+        //String url = Statics.BASE_URL + "create?name=" + t.getName() + "&status=" + t.getStatus();
+        String url = Statics.BASE_URL + "/signup";
+
         req.setUrl(url);
-       
-        //Control saisi
-        if(username.getText().equals(" ") && password.getText().equals(" ") && email.getText().equals(" ")) {
-            
-            Dialog.show("Erreur","Veuillez remplir les champs","OK",null);
-            
-        }
-        
-        //hethi wa9t tsir execution ta3 url 
-        req.addResponseListener((e)-> {
-         
-            //njib data ly7atithom fi form 
-            byte[]data = (byte[]) e.getMetaData();//lazm awl 7aja n7athrhom ke meta data ya3ni na5o id ta3 kol textField 
-            String responseData = new String(data);//ba3dika na5o content 
-            
-            System.out.println("data ===>"+responseData);
-        }
-        );
-        
-        
-        //ba3d execution ta3 requete ely heya url nestanaw response ta3 server.
+        req.setPost(false);
+      req.addArgument("firstname", firstname);
+        req.addArgument("lastname", lastname);
+        req.addArgument("email",email);
+        req.addArgument("password", password);
+        req.addArgument("username",username+ "");
+        req.addResponseListener(new ActionListener<NetworkEvent>() {
+            @Override
+            public void actionPerformed(NetworkEvent evt) {
+                resultOK = req.getResponseCode() == 200; //Code HTTP 200 OK
+                req.removeResponseListener(this);
+            }
+        });
         NetworkManager.getInstance().addToQueueAndWait(req);
-        
-            
-        
+        return resultOK;
     }
     
     
     //SignIn
     
-    public void signin(TextField username,TextField password, Resources rs ) {
+    public void signin(TextField email ,TextField password, Resources rs ) {
         
         
-        String url = Statics1.BASE_URL+"/user/signin?username="+username.getText().toString()+"&password="+password.getText().toString();
-        req = new ConnectionRequest(url, false); //false ya3ni url mazlt matba3thtich lel server
-        req.setUrl(url);
-        
-        req.addResponseListener((e) ->{
             
-            JSONParser j = new JSONParser();
-            
-            String json = new String(req.getResponseData()) + "";
-            
-            
-         
-             
-            
-            
-            
-            
-        });
-    
-         //ba3d execution ta3 requete ely heya url nestanaw response ta3 server.
-        NetworkManager.getInstance().addToQueueAndWait(req);
-    }
-    
 
-  //heki 5dmtha taw nhabtha ala description
-    public String getPasswordByEmail(String email, Resources rs ) {
-        
-        
-        String url = Statics1.BASE_URL+"/user/getPasswordByEmail?email="+email;
-        req = new ConnectionRequest(url, false); //false ya3ni url mazlt matba3thtich lel server
+        String url = Statics.BASE_URL + "/signin";
+        System.out.println(url);
         req.setUrl(url);
-        
-        req.addResponseListener((e) ->{
-            
-            JSONParser j = new JSONParser();
-            
-             json = new String(req.getResponseData()) + "";
-            
-            
-            try {
-            
-          
-                System.out.println("data =="+json);
-                
-                Map<String,Object> password = j.parseJSON(new CharArrayReader(json.toCharArray()));
-                
-                
-            
-            
-            }catch(Exception ex) {
-                ex.printStackTrace();
+        req.setPost(false);
+        req.addArgument("email", email.getText());
+        req.addArgument("password", password.getText());
+        req.addResponseListener(new ActionListener<NetworkEvent>() {
+            @Override
+            public void actionPerformed(NetworkEvent evt) {
+                JSONParser j = new JSONParser();
+                int json1 = req.getResponseData().length;
+
+                try {
+                    json = new String(req.getResponseData(), "utf-8");
+                    System.out.println("++++++++>>>>>>  " + json);
+                } catch (UnsupportedEncodingException ex) {
+                    System.out.println(ex.getMessage());
+                }
+
+                if (json1 < 10) {
+                    Dialog.show("Echec d'authentification", "email ou mot de passe est erroné", "OK", null);
+
+                } else {
+                    System.out.println("data--->" + json);
+                    try {
+                        Map<String, Object> user = j.parseJSON(new CharArrayReader(json.toCharArray()));
+                        //List<Map<String, Object>> list = (List<Map<String, Object>>) user.get("root");
+
+                        System.out.println("useeeeeeeer " + user);
+                       
+                            List roles = (List) user.get("roles");
+                            String role = (String) roles.get(0);
+                            float id = Float.parseFloat(user.get("id").toString());
+                            SessionManager.setId((int) id);
+                            SessionManager.setEmail(user.get("email").toString());
+                            SessionManager.setNom(user.get("lastName").toString());
+//                            SessionManager.setPicture(user.get("picture").toString());
+                            SessionManager.setPrénom(user.get("firstName").toString());
+                            System.out.println("role"+role);
+                            if ( role.equals("ROLE_ADMIN")) {
+                                new AdminForm(rs).show();
+                            } else {
+                                new EditForm(rs).show();
+                            }
+                            
+                        
+                        System.out.println("user =>" + SessionManager.getEmail());
+
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+                }
+                req.removeResponseListener(this);
             }
-            
-            
-            
         });
-    
-         //ba3d execution ta3 requete ely heya url nestanaw response ta3 server.
         NetworkManager.getInstance().addToQueueAndWait(req);
-    return json;
     }
+    public boolean edituser(String id, String firstname, String lastname, String email, String username) {
 
-}
+        String url = Statics.BASE_URL + "/editUser";
+
+        req.setUrl(url);
+        req.setPost(false);
+        req.addArgument("id", id);
+        req.addArgument("firstName", firstname);
+        req.addArgument("lastName", lastname);
+        req.addArgument("email", email);
+        req.addArgument("username", username);
+
+        JSONParser j = new JSONParser();
+
+        req.addResponseListener(new ActionListener<NetworkEvent>() {
+            @Override
+            public void actionPerformed(NetworkEvent evt) {
+                json = new String(req.getResponseData());
+                int json1 = req.getResponseData().length;
+
+                
+                    System.out.println("++++++++>>>>>>  " + json);
+
+                    try {
+                        Map<String, Object> user = j.parseJSON(new CharArrayReader(json.toCharArray()));
+                        com.codename1.ui.List<Map<String, Object>> list = (com.codename1.ui.List<Map<String, Object>>) user.get("root");
+                        System.out.println("useeeeeeeer " + user.get("resetToken"));
+
+                        Dialog.show("Succes", "Modification avec succes", "OK", null);
+
+                    } catch (IOException ex) {
+                        System.out.println(ex.getMessage());
+                    }
+
+                
+                req.removeResponseListener(this);
+
+            }
+        });
+        NetworkManager.getInstance().addToQueueAndWait(req);
+        return resultOK;
+    }
+    
+    }
+    
+
+
+

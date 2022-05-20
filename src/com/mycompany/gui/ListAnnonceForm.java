@@ -8,6 +8,7 @@ package com.mycompany.gui;
 import com.codename1.components.InfiniteProgress;
 import com.codename1.components.ScaleImageLabel;
 import com.codename1.components.SpanLabel;
+import static com.codename1.io.Log.p;
 import com.codename1.ui.Button;
 import com.codename1.ui.ButtonGroup;
 import com.codename1.ui.Component;
@@ -36,26 +37,24 @@ import com.codename1.ui.layouts.LayeredLayout;
 import com.codename1.ui.plaf.Style;
 import com.codename1.ui.spinner.Picker;
 import com.codename1.ui.util.Resources;
-import com.mycomany.entities.Programme;
-
-import com.mycompany.services.ServiceProgramme;
-
+import com.mycomany.entities.Annonce;
+import com.mycompany.services.ServicesAnnonce;
 import java.util.ArrayList;
 
 /**
  *
  * @author Lenovo
  */
-public class ListProgrammeForm1 extends BaseForm{
+public class ListAnnonceForm extends BaseForm{
     
     Form current;
-    public ListProgrammeForm1(Resources res ) {
+    public ListAnnonceForm(Resources res ) {
           super("Newsfeed",BoxLayout.y()); //herigate men Newsfeed w l formulaire vertical
         Toolbar tb = new Toolbar(true);
         current = this ;
         setToolbar(tb);
         getTitleArea().setUIID("Container");
-        setTitle("Ajout Programme");
+        setTitle("Ajout Annonce");
         getContentPane().setScrollVisible(false);
         
         
@@ -124,35 +123,18 @@ public class ListProgrammeForm1 extends BaseForm{
         add(LayeredLayout.encloseIn(swipe, radioContainer));
 
         ButtonGroup barGroup = new ButtonGroup();
-        RadioButton mesListes = RadioButton.createToggle("Mes Programmes", barGroup);
+        RadioButton mesListes = RadioButton.createToggle("Mes Annoncees", barGroup);
         mesListes.setUIID("SelectBar");
+        
+        RadioButton acceuil = RadioButton.createToggle("Ajouter ", barGroup);
+        acceuil.setUIID("SelectBar");
       
         RadioButton partage = RadioButton.createToggle("Ajouter ", barGroup);
         partage.setUIID("SelectBar");
+        
         Label arrow = new Label(res.getImage("news-tab-down-arrow.png"), "Container");
-        
-  RadioButton acceuil= RadioButton.createToggle("Acceuil ", barGroup);
-       acceuil.setUIID("SelectBar");
-      
-
-
-        mesListes.addActionListener((e) -> {
-               InfiniteProgress ip = new InfiniteProgress();
-        final Dialog ipDlg = ip.showInifiniteBlocking();
-        
-        ListProgrammeForm1 a = new ListProgrammeForm1(res);
-           a.show();
-            refreshTheme();
-        });
-          partage.addActionListener((e) -> {
-               InfiniteProgress ip = new InfiniteProgress();
-        final Dialog ipDlg = ip.showInifiniteBlocking();
-        
-        AjoutProgrammeForm1 a = new AjoutProgrammeForm1(res);
-           a.show();
-            refreshTheme();
-        });
-    acceuil.addActionListener((e) -> {
+   
+        acceuil.addActionListener((e) -> {
                InfiniteProgress ip = new InfiniteProgress();
         final Dialog ipDlg = ip.showInifiniteBlocking();
         
@@ -160,6 +142,24 @@ public class ListProgrammeForm1 extends BaseForm{
            a.show();
             refreshTheme();
         });
+
+        mesListes.addActionListener((e) -> {
+               InfiniteProgress ip = new InfiniteProgress();
+        final Dialog ipDlg = ip.showInifiniteBlocking();
+        
+        ListAnnonceForm a = new ListAnnonceForm(res);
+           a.show();
+            refreshTheme();
+        });
+          partage.addActionListener((e) -> {
+               InfiniteProgress ip = new InfiniteProgress();
+        final Dialog ipDlg = ip.showInifiniteBlocking();
+        
+        AjoutAnnonceForm a = new AjoutAnnonceForm(res);
+           a.show();
+            refreshTheme();
+        });
+
         add(LayeredLayout.encloseIn(
                 GridLayout.encloseIn(3, mesListes, partage,acceuil),
                 FlowLayout.encloseBottom(arrow)
@@ -181,16 +181,16 @@ public class ListProgrammeForm1 extends BaseForm{
         
       
         //Appel affichage methode
-        ArrayList<Programme>list = ServiceProgramme.getInstance().getAllProgrammes();
+        ArrayList<Annonce>list = ServicesAnnonce.getInstance().getAllAnnonces();
         
-        for(Programme p : list ) {
+        for(Annonce a : list ) {
              String urlImage ="timeline-background.jpg";//image statique pour le moment ba3d taw fi  videos jayin nwarikom image 
             
              Image placeHolder = Image.createImage(120, 90);
              EncodedImage enc =  EncodedImage.createFromImage(placeHolder,false);
              URLImage urlim = URLImage.createToStorage(enc, urlImage, urlImage, URLImage.RESIZE_SCALE);
              
-                addButton(res.getImage(urlImage),p,res);
+                addButton(res.getImage(urlImage),a,res);
         
                 ScaleImageLabel image = new ScaleImageLabel(urlim);
                 
@@ -266,7 +266,7 @@ public class ListProgrammeForm1 extends BaseForm{
         l.getParent().repaint();
     }
 
-    private void addButton(Image img, Programme p, Resources res) {
+    private void addButton(Image img, Annonce a, Resources res) {
         
         int height = Display.getInstance().convertToPixels(11.5f);
         int width = Display.getInstance().convertToPixels(14f);
@@ -277,11 +277,11 @@ public class ListProgrammeForm1 extends BaseForm{
         
         
         //kif nzidouh  ly3endo date mathbih fi codenamone y3adih string w y5alih f symfony dateTime w ytab3ni cha3mlt taw yjih
-        Label titretTxt = new Label("titre : "+p.getTitre(),"NewsTopLine2");
-        Label descTxt = new Label("description : "+p.getDescription(),"NewsTopLine2");
-        Label prixTxt = new Label("prix : "+p.getPrix(),"NewsTopLine2" );
-        Label adrTxt = new Label("addresse : "+p.getAdresse(),"NewsTopLine2" );
-        Label dateTxt = new Label("date : "+p.getDate(),"NewsTopLine2" );
+        Label titretTxt = new Label("titre : "+a.getTitre(),"NewsTopLine2");
+        Label descTxt = new Label("description : "+a.getDescription(),"NewsTopLine2");
+        Label prixTxt = new Label("prix : "+a.getPrix(),"NewsTopLine2" );
+        Label adrTxt = new Label("addresse : "+a.getType(),"NewsTopLine2" );
+        Label dateTxt = new Label("date : "+a.getDate(),"NewsTopLine2" );
        
         
         createLineSeparator();
@@ -303,15 +303,15 @@ public class ListProgrammeForm1 extends BaseForm{
             
             Dialog dig = new Dialog("Suppression");
             
-            if(dig.show("Suppression","Vous voulez supprimer ce Programme ?","Annuler","Oui")) {
+            if(dig.show("Suppression","Vous voulez supprimer cette annonce ?","Annuler","Oui")) {
                 dig.dispose();
             }
             else {
                 dig.dispose();
                  }
                 //n3ayto l suuprimer men service Reclamation
-                if(ServiceProgramme.getInstance().deleteReclamation(p.getId())) {
-                    new ListProgrammeForm1(res).show();
+                if(ServicesAnnonce.getInstance().deleteAnnonce(a.getId())) {
+                    new ListAnnonceForm(res).show();
                 }
            
         });
@@ -329,7 +329,7 @@ public class ListProgrammeForm1 extends BaseForm{
         
         lModifier.addPointerPressedListener(l -> {
             //System.out.println("hello update");
-           new ModifierProgrammeForm(res,p).show();
+           new ModifierAnnonceForm(res,a).show();
         });
         
         

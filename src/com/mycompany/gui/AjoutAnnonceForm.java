@@ -31,16 +31,12 @@ import com.codename1.ui.layouts.LayeredLayout;
 import com.codename1.ui.plaf.Style;
 import com.codename1.ui.spinner.Picker;
 import com.codename1.ui.util.Resources;
-import com.mycomany.entities.Category;
-import com.mycomany.entities.OptionGuide;
-import com.mycomany.entities.OptionTransport;
-import com.mycomany.entities.Programme;
+import com.mycomany.entities.Annonce;
 
-import com.mycompany.services.ServiceCategory;
-import com.mycompany.services.ServiceGuide;
-import com.mycompany.services.ServiceProgramme;
 
-import com.mycompany.services.ServiceTransport;
+
+
+import com.mycompany.services.ServicesAnnonce;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,11 +45,11 @@ import java.util.Date;
  *
  * @author Lenovo
  */
-public class AjoutProgrammeForm1 extends BaseForm {
+public class AjoutAnnonceForm extends BaseForm {
     
     
     Form current;
-    public AjoutProgrammeForm1(Resources res ) {
+    public AjoutAnnonceForm(Resources res ) {
         super("Newsfeed",BoxLayout.y()); //herigate men Newsfeed w l formulaire vertical
     
         Toolbar tb = new Toolbar(true);
@@ -116,7 +112,7 @@ public class AjoutProgrammeForm1 extends BaseForm {
         add(LayeredLayout.encloseIn(swipe, radioContainer));
 
         ButtonGroup barGroup = new ButtonGroup();
-        RadioButton mesListes = RadioButton.createToggle("Mes Programmess", barGroup);
+        RadioButton mesListes = RadioButton.createToggle("Mes Annonces", barGroup);
         mesListes.setUIID("SelectBar");
        /* RadioButton liste = RadioButton.createToggle("Autres", barGroup);
         liste.setUIID("SelectBar");*/
@@ -129,7 +125,7 @@ public class AjoutProgrammeForm1 extends BaseForm {
                InfiniteProgress ip = new InfiniteProgress();
         final Dialog ipDlg = ip.showInifiniteBlocking();
         
-         ListProgrammeForm1 a = new ListProgrammeForm1(res);
+         ListAnnonceForm a = new ListAnnonceForm(res);
            a.show();
             refreshTheme();
         });
@@ -157,52 +153,29 @@ public class AjoutProgrammeForm1 extends BaseForm {
         //
         
       
-        TextField titre = new TextField("", "titre!!");
+        TextField titre = new TextField("", "Titre de votre annonce");
         titre.setUIID("TextFieldBlack");
-        addStringValue("Objet",titre);
+        addStringValue("Titre",titre);
         
-        TextField description = new TextField("", "entrer description!!");
+        TextField description = new TextField("", "Entrer une description");
         description.setUIID("TextFieldBlack");
         addStringValue("Description",description);
         
-         TextField addresse = new TextField("", "entrer addresse!!");
-        addresse.setUIID("TextFieldBlack");
-        addStringValue("addresse",addresse);
+         TextField type = new TextField("", "Type de votre logement");
+        type.setUIID("TextFieldBlack");
+        addStringValue("Type",type);
         
-        TextField prix = new TextField("", "entrer prix!!");
+        TextField prix = new TextField("", "Prix de votre annonce");
         prix.setUIID("TextFieldBlack");
-        addStringValue("prix",prix);
+        addStringValue("Prix",prix);
         
          Picker pk = new Picker();
           //Label resDate = new Label("Datede naissance"+pk.getText());
          pk.setUIID("TextFieldBlack");
         addStringValue("date",pk);
         
-         ServiceCategory sc = new ServiceCategory();
-         ComboBox cb_c = new ComboBox();
-        ArrayList<Category>list = ServiceCategory.getInstance().getAllcategories();
-        for (int i = 0; i <list.size(); i++) {
-          cb_c.addItem(list.get(i).getTitre());
-        }     
-        addStringValue("",cb_c);
-        
-             ServiceGuide sg = new ServiceGuide();
-         ComboBox cb_g = new ComboBox();
-        ArrayList<OptionGuide>listg = ServiceGuide.getInstance().getAllguides();
-        for (int i = 0; i <listg.size(); i++) {
-          cb_g.addItem(listg.get(i).getNom());
-        }
-             
-        addStringValue("",cb_g);
-        
-             ServiceTransport st = new ServiceTransport();
-         ComboBox cb_t = new ComboBox();
-        ArrayList<OptionTransport>listt = ServiceTransport.getInstance().getAllTransport();
-        for (int i = 0; i <listt.size(); i++) {
-          cb_t.addItem(listt.get(i).getMatricule());
-        }
-             
-        addStringValue("",cb_t);
+     
+  
         
         Button btnAjouter = new Button("Ajouter");
         addStringValue("", btnAjouter);
@@ -227,30 +200,28 @@ public class AjoutProgrammeForm1 extends BaseForm {
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                     
                     //njibo iduser men session (current user)
-                   Programme p = new Programme(String.valueOf(titre.getText()
-                                  ).toString(),
-                                  String.valueOf(description.getText()).toString(),
+                    Annonce p = new Annonce(titre.getText()
+                                  ,
+                                  description.getText(),
                                   Float.valueOf(prix.getText()),
-                                   String.valueOf(addresse.getText()).toString(),
-                                   String.valueOf(cb_g.getSelectedItem()).toString(),
-                                   String.valueOf(cb_c.getSelectedItem()).toString(),
-                                   String.valueOf(cb_t.getSelectedItem().toString())
+                                   type.getText()
+                              
                                     
                   );
                     
-                    System.out.println("data  reclamation == "+p);
+                    System.out.println("data  programme == "+p);
                     
                     
                     //appelle methode ajouterReclamation mt3 service Reclamation bch nzido données ta3na fi base 
-                    ServiceProgramme.getInstance().addProgramme(p);
+                    ServicesAnnonce.getInstance().addAnnonce(p);
                     
                     iDialog.dispose(); //na7io loading ba3d ma3mlna ajout
                     
                     //ba3d ajout net3adaw lel ListREclamationForm
-                    new ListProgrammeForm1(res).show();
+                    new ListAnnonceForm(res).show();
                     
                     
-                   refreshTheme();//Actualisation
+                refreshTheme();//Actualisation
                             
                 }
                 
